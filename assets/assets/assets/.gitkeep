@@ -30,3 +30,8 @@ document.addEventListener('keydown', (e) => {
 });
 
 draw();
+// Mobil butonları bağla
+document.getElementById('up').addEventListener('click', () => { y -= 10; draw(); });
+document.getElementById('down').addEventListener('click', () => { y += 10; draw(); });
+document.getElementById('left').addEventListener('click', () => { x -= 10; draw(); });
+document.getElementById('right').addEventListener('click', () => { x += 10; draw(); });
