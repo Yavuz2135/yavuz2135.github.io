@@ -1,38 +1,41 @@
-// Basit kare oyunu (klavye + mobil kontroller)
-const canvas = document.createElement('canvas');
-canvas.id = 'gameCanvas';
-canvas.width = 280;
-canvas.height = 280;
-canvas.style.background = '#222';
-canvas.style.display = 'block';
-canvas.style.margin = 'auto';
+window.onload = function() {
 
-document.querySelector('.game-container').appendChild(canvas);
+  // Canvas oluştur
+  const canvas = document.createElement('canvas');
+  canvas.id = 'gameCanvas';
+  canvas.width = 280;
+  canvas.height = 280;
+  canvas.style.background = '#222';
+  canvas.style.display = 'block';
+  canvas.style.margin = 'auto';
+  document.querySelector('.game-container').appendChild(canvas);
 
-const ctx = canvas.getContext('2d');
-let x = 50;
-let y = 50;
-const size = 30;
+  const ctx = canvas.getContext('2d');
+  let x = 50;
+  let y = 50;
+  const size = 30;
 
-function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#00ff00';
-  ctx.fillRect(x, y, size, size);
-}
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#00ff00';
+    ctx.fillRect(x, y, size, size);
+  }
 
-// Klavye ile kontrol
-document.addEventListener('keydown', (e) => {
-  if(e.key === 'ArrowRight') x += 10;
-  if(e.key === 'ArrowLeft') x -= 10;
-  if(e.key === 'ArrowUp') y -= 10;
-  if(e.key === 'ArrowDown') y += 10;
+  // Klavye ile kontrol
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'ArrowRight') x += 10;
+    if(e.key === 'ArrowLeft') x -= 10;
+    if(e.key === 'ArrowUp') y -= 10;
+    if(e.key === 'ArrowDown') y += 10;
+    draw();
+  });
+
+  // Mobil butonlarla kontrol
+  document.getElementById('up').addEventListener('click', () => { y -= 10; draw(); });
+  document.getElementById('down').addEventListener('click', () => { y += 10; draw(); });
+  document.getElementById('left').addEventListener('click', () => { x -= 10; draw(); });
+  document.getElementById('right').addEventListener('click', () => { x += 10; draw(); });
+
   draw();
-});
 
-// Mobil butonlarla kontrol
-document.getElementById('up').addEventListener('click', () => { y -= 10; draw(); });
-document.getElementById('down').addEventListener('click', () => { y += 10; draw(); });
-document.getElementById('left').addEventListener('click', () => { x -= 10; draw(); });
-document.getElementById('right').addEventListener('click', () => { x += 10; draw(); });
-
-draw();
+}
