@@ -1,19 +1,17 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Yavuz'un Oyun Sayfası</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
 <header>
   <h1>Yavuz'un Oyunları 🎮</h1>
 </header>
 
+<div class="game-selection">
+  <h2>Oyunlar</h2>
+  <div class="games-list">
+    <img src="oyun1.png" alt="Oyun 1" id="btn-oyun1" class="game-thumb">
+    <img src="oyun2.png" alt="Oyun 2" id="btn-oyun2" class="game-thumb">
+  </div>
+</div>
+
 <div class="game-container">
-  <!-- Mobil kontrol butonları -->
+  <!-- Canvas buraya yüklenecek -->
   <div class="mobile-controls">
     <button id="up">↑</button>
     <div>
@@ -23,7 +21,6 @@
     </div>
   </div>
 </div>
-
 <script src="oyun1.js"></script>
-</body>
-</html>
+<script src="oyun2.js"></script>
+<script src="main.js"></script>
