@@ -1,5 +1,4 @@
-window.onload = function() {
-
+function oyun1() {
   // Canvas oluştur
   const canvas = document.createElement('canvas');
   canvas.id = 'gameCanvas';
@@ -8,12 +7,12 @@ window.onload = function() {
   canvas.style.background = '#222';
   canvas.style.display = 'block';
   canvas.style.margin = 'auto';
-  document.querySelector('.game-container').appendChild(canvas);
-
+  
+  const container = document.querySelector('.game-container');
+  container.appendChild(canvas);
+  
   const ctx = canvas.getContext('2d');
-  let x = 50;
-  let y = 50;
-  const size = 30;
+  let x = 50, y = 50, size = 30;
 
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -30,12 +29,11 @@ window.onload = function() {
     draw();
   });
 
-  // Mobil butonlarla kontrol
+  // Mobil kontroller
   document.getElementById('up').addEventListener('click', () => { y -= 10; draw(); });
   document.getElementById('down').addEventListener('click', () => { y += 10; draw(); });
   document.getElementById('left').addEventListener('click', () => { x -= 10; draw(); });
   document.getElementById('right').addEventListener('click', () => { x += 10; draw(); });
 
   draw();
-
 }
