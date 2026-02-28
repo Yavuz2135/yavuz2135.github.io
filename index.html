@@ -1,42 +1,22 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Yavuz'un Oyun Sayfası</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>YavuKan Oyunları - Cyberpunk Arcade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-  <h1>Yavuz'un Oyunları 🎮</h1>
-</header>
-
-<div class="game-selection">
-  <h2>Oyunlar</h2>
-  <div class="games-list">
-
-    <!-- Oyun 1 Kartı -->
-    <div class="game-card" id="btn-oyun1">
-      <img src="oyun1.png" alt="Oyun 1" class="game-thumb">
-      <h3 class="game-title">Oyun 1</h3>
+    <!-- Logo Splash Screen -->
+    <div id="logo-splash" class="logo-splash hidden">
+        <canvas id="logo-canvas"></canvas>
+        <div class="logo-text">
+            <span class="logo-y">Yavu</span><span class="logo-k">Kan</span>
+        </div>
     </div>
 
-    <!-- Oyun 2 Kartı -->
-    <div class="game-card" id="btn-oyun2">
-      <img src="oyun2.png" alt="Oyun 2" class="game-thumb">
-      <h3 class="game-title">Oyun 2</h3>
-    </div>
-
-    <!-- İstersen daha fazla ekle -->
-    <!-- <div class="game-card"> ... </div> -->
-
-  </div>
-</div>
-
-
-
-<script src="oyun1.js"></script>
-<script src="oyun2.js"></script>
-<script src="main.js"></script>
-</body>
-</html>
+    <!-- Ana Sayfa Container -->
+    <div id="main-page
