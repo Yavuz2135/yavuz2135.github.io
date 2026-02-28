@@ -86,9 +86,9 @@ function initUzayFirtinasi() {
             if (keys.ArrowLeft || keys.a) this.vx -= 1.5;
             if (keys.ArrowRight || keys.d) this.vx += 1.5;
             
-            // Mouse kontrolü
-            if (isMouseDown) {
-                if (Math.abs(this.x - mouseX) > 10) this.vx += (mouseX - this.x) * 0.05;
+            // Mouse kontrolü - sadece mousedown olduğunda
+            if (isMouseDown && Math.abs(this.x - mouseX) > 10) {
+                this.vx += (mouseX - this.x) * 0.05;
             }
             
             // Touch kontrolü
