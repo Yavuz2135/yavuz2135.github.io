@@ -1,110 +1,109 @@
-/* Genel stil */
+:root {
+    --bg-color: #050510;
+    --primary: #0ff;
+    --secondary: #f0f;
+    --accent: #0f0;
+    --text: #fff;
+    --font: 'Orbitron', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+}
+
 body {
-  margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-  color: #e0e0ff;
-  min-height: 100vh;
+    background-color: var(--bg-color);
+    color: var(--text);
+    font-family: var(--font);
+    overflow: hidden;
+    touch-action: none;
 }
 
-header {
-  text-align: center;
-  padding: 2rem 1rem;
-  background: rgba(0, 0, 0, 0.4);
+.hidden { display: none !important; }
+
+/* Splash Screen & Logo Anim */
+.splash {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: #000; display: flex; justify-content: center; align-items: center;
+    z-index: 9999; transition: opacity 0.5s;
+}
+.logo {
+    font-size: 4rem; font-weight: 900; color: transparent;
+    -webkit-text-stroke: 2px var(--primary); text-shadow: 0 0 20px var(--primary);
+    animation: pulse 2s infinite, wave 3s ease-in-out infinite;
 }
 
-h1 {
-  margin: 0;
-  font-size: 3.5rem;
-  text-shadow: 0 0 15px #00ff9d;
+@keyframes pulse {
+    0%, 100% { text-shadow: 0 0 20px var(--primary); }
+    50% { text-shadow: 0 0 40px var(--secondary), 0 0 60px var(--primary); -webkit-text-stroke: 2px var(--secondary); }
+}
+@keyframes wave {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-20px) rotate(2deg); }
 }
 
-.game-selection {
-  text-align: center;
-  padding: 1rem;
+/* Main Menu Grid */
+.container {
+    padding: 2rem; height: 100vh; display: flex; flex-direction: column; align-items: center;
+    background: radial-gradient(circle at center, #111, #000);
 }
 
-h2 {
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
+header { margin-bottom: 3rem; }
+.glitch {
+    font-size: 3rem; position: relative;
+    text-shadow: 0.05em 0 0 rgba(255,0,0,0.75), -0.025em -0.05em 0 rgba(0,255,0,0.75), 0.025em 0.05em 0 rgba(0,0,255,0.75);
+    animation: glitch 500ms infinite;
 }
 
-.games-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1.5rem;
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 0 1rem;
+.game-grid {
+    display: grid; grid-template-columns: 1fr; gap: 2rem; width: 100%; max-width: 1000px;
 }
+@media (min-width: 768px) { .game-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .game-grid { grid-template-columns: repeat(3, 1fr); } }
 
-/* Oyun kartları */
 .game-card {
-  position: relative;
-  overflow: hidden;
-  border-radius: 12px;
-  background: rgba(20, 20, 60, 0.7);
-  border: 2px solid #00ff9d44;
-  box-shadow: 0 4px 15px rgba(0, 255, 157, 0.15);
-  transition: all 0.3s ease;
-  cursor: pointer;
+    background: rgba(20, 20, 40, 0.8); border: 2px solid #333; border-radius: 15px;
+    padding: 2rem; text-align: center; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;
+}
+.game-card::before {
+    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: conic-gradient(transparent, rgba(0, 255, 255, 0.3), transparent 30%);
+    animation: rotate 4s linear infinite; opacity: 0; transition: opacity 0.3s;
+}
+@keyframes rotate { 100% { transform: rotate(360deg); } }
+
+.game-card.active { border-color: var(--primary); box-shadow: 0 0 20px rgba(0, 255, 255, 0.4); }
+.game-card.active:hover { transform: scale(1.05); box-shadow: 0 0 30px var(--primary); }
+.game-card.active:hover::before { opacity: 1; }
+.game-card.locked { opacity: 0.6; cursor: not-allowed; border-color: #555; }
+.card-content { position: relative; z-index: 1; }
+.game-card h2 { margin-bottom: 0.5rem; color: #fff; }
+.game-card.active p { color: var(--primary); font-weight: bold; }
+.game-card.locked p { color: #888; }
+
+footer { margin-top: auto; color: #555; }
+
+/* Game UI Layer */
+#game-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; }
+canvas { display: block; width: 100%; height: 100%; }
+
+#ui-layer {
+    position: absolute; top: 0; left: 0; width: 100%; padding: 1rem; display: flex; justify-content: space-between;
+    pointer-events: none; font-size: 1.5rem; text-shadow: 0 0 10px var(--primary);
 }
 
-.game-card:hover {
-  transform: translateY(-8px) scale(1.05);
-  border-color: #00ff9d;
-  box-shadow: 0 10px 30px rgba(0, 255, 157, 0.4);
+.overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8); display: flex; flex-direction: column; justify-content: center; align-items: center;
+    gap: 1.5rem; backdrop-filter: blur(5px); pointer-events: auto;
 }
-
-.game-thumb {
-  width: 100%;
-  height: auto;
-  display: block;
-  transition: transform 0.4s;
+.overlay h2 { font-size: 3rem; color: var(--secondary); text-shadow: 0 0 20px var(--secondary); }
+.overlay button {
+    padding: 1rem 2rem; font-size: 1.2rem; font-family: var(--font); background: transparent;
+    color: var(--primary); border: 2px solid var(--primary); border-radius: 8px; cursor: pointer;
+    transition: all 0.2s; box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
 }
-
-.game-card:hover .game-thumb {
-  transform: scale(1.08);
-}
-
-/* Oyun ismi (resmin altına) */
-.game-title {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-  color: white;
-  padding: 1rem 0.8rem 0.6rem;
-  margin: 0;
-  font-size: 1.1rem;
-  text-align: center;
-  opacity: 0.9;
-}
-
-/* Canvas ve kontroller */
-.game-container {
-  margin: 2rem auto;
-  max-width: 800px;
-  text-align: center;
-}
-
-.mobile-controls {
-  margin-top: 1rem;
-  display: none; /* Masaüstünde gizli, mobil için media query ile göster */
-}
-
-@media (max-width: 600px) {
-  .mobile-controls {
-    display: block;
-  }
-  .mobile-controls button {
-    font-size: 1.8rem;
-    padding: 0.8rem 1.2rem;
-    margin: 0.3rem;
-    background: #00ff9d33;
-    border: 2px solid #00ff9d;
-    color: white;
-    border-radius: 8px;
-  }
-}
+.overlay button:hover { background: var(--primary); color: #000; box-shadow: 0 0 20px var(--primary); }
