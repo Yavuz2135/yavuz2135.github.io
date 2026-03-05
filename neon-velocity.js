@@ -2,6 +2,8 @@ function initNeonVelocity() {
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const scoreEl = document.getElementById('score');
+    
+    // Canvas boyutlarını güncelle
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
@@ -15,8 +17,8 @@ function initNeonVelocity() {
         width: 35,
         height: 35,
         dy: 0,
-        jumpForce: 20, // YÜKSEK ZIPLAMA AYARI
-        gravity: 0.6,  // SÜZÜLME AYARI
+        jumpForce: 20,
+        gravity: 0.6,
         grounded: false
     };
 
@@ -27,11 +29,13 @@ function initNeonVelocity() {
         }
     }
 
+    // Kontrolleri başlat
     window.onkeydown = (e) => { if(e.code === 'Space') jump(); };
-    window.ontouchstart = () => { jump(); };
+    window.ontouchstart = (e) => { e.preventDefault(); jump(); };
 
     function update() {
         if (!gameActive) return;
+        
         player.dy += player.gravity;
         player.y += player.dy;
 
@@ -56,97 +60,75 @@ function initNeonVelocity() {
         });
     }
 
-    // --- oyun1.js dosyasındaki Draw fonksiyonunu bu kodla değiştirin ---
-
-function draw() {
-    // 1. Arka Planı Temizle
-    ctx.fillStyle = '#050510';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // 2. Neon Zemin Çizimi
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = '#0ff';
-    ctx.strokeStyle = '#0ff';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(0, canvas.height - 100);
-    ctx.lineTo(canvas.width, canvas.height - 100);
-    ctx.stroke();
-
-    // ---------------------------------------------------------
-    // 3. YAVUKAN KARAKTER TASARIMI (Burayı ekledik)
-    // ---------------------------------------------------------
-    
-    // Karakterin Ana Rengi (Gövde)
-    ctx.shadowBlur = 20;
-    ctx.shadowColor = '#0ff'; // Parlama rengi
-    ctx.fillStyle = '#0ff'; // İç renk
-    
-    // Zıplarken şekil değiştirme efekti (Stretch)
-    let drawHeight = player.height;
-    let drawY = player.y;
-    if (!player.grounded) {
-        // Havadaysa hafifçe uzar
-        drawHeight = player.height + 5;
-        drawY = player.y - 5;
+    function drawRoundRect(ctx, x, y, width, height, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
     }
 
-    // Karakterin Gövdesini Çiz (Hafif yuvarlak köşeli)
-    drawRoundRect(ctx, player.x, drawY, player.width, drawHeight, 5);
-    ctx.fill();
+    function draw() {
+        if (!gameActive) return;
 
-    // -- Gözler (Neon Efektli) --
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = '#fff';
-    ctx.fillStyle = '#fff';
-    
-    // Sol Göz
-    ctx.fillRect(player.x + 8, drawY + 8, 6, 6);
-    // Sağ Göz
-    ctx.fillRect(player.x + 20, drawY + 8, 6, 6);
+        ctx.fillStyle = '#050510';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // -- Bacaklar (Yürüyüş Animasyonu) --
-    if (player.grounded && gameActive) {
-        ctx.shadowBlur = 10;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = '#0ff';
+        ctx.strokeStyle = '#0ff';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(0, canvas.height - 100);
+        ctx.lineTo(canvas.width, canvas.height - 100);
+        ctx.stroke();
+
+        ctx.shadowBlur = 20;
         ctx.shadowColor = '#0ff';
         ctx.fillStyle = '#0ff';
         
-        // Zamanlama tabanlı basit bacak hareketi
-        let legMove = Math.sin(Date.now() / 100) * 3;
-        
-        // Sol Bacak
-        ctx.fillRect(player.x + 5, drawY + drawHeight, 8, 8 + legMove);
-        // Sağ Bacak
-        ctx.fillRect(player.x + 22, drawY + drawHeight, 8, 8 - legMove);
-    }
-    
-    // ---------------------------------------------------------
-    // 4. Engelleri Çiz (Mevcut kodunuz)
-    // ---------------------------------------------------------
-    ctx.fillStyle = '#f0f';
-    ctx.shadowColor = '#f0f';
-    ctx.shadowBlur = 15;
-    obstacles.forEach(obs => {
-        drawRoundRect(ctx, obs.x, canvas.height - 100 - obs.height, obs.width, obs.height, 5);
+        let drawHeight = player.height;
+        let drawY = player.y;
+        if (!player.grounded) {
+            drawHeight = player.height + 5;
+            drawY = player.y - 5;
+        }
+
+        drawRoundRect(ctx, player.x, drawY, player.width, drawHeight, 5);
         ctx.fill();
-    });
 
-    ctx.shadowBlur = 0; // Performans için gölgeleri kapa
-    
-    if (gameActive) requestAnimationFrame(() => { update(); draw(); });
-}
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#fff';
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(player.x + 8, drawY + 8, 6, 6);
+        ctx.fillRect(player.x + 20, drawY + 8, 6, 6);
 
-// Köşeleri yuvarlatmak için yardımcı fonksiyon (Dosyanın en altına ekleyebilirsiniz)
-function drawRoundRect(ctx, x, y, width, height, radius) {
-    ctx.beginPath();
-    ctx.moveTo(x + radius, y);
-    ctx.lineTo(x + width - radius, y);
-    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-    ctx.lineTo(x + width, y + height - radius);
-    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-    ctx.lineTo(x + radius, y + height);
-    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-    ctx.lineTo(x, y + radius);
-    ctx.quadraticCurveTo(x, y, x + radius, y);
-    ctx.closePath();
+        if (player.grounded) {
+            ctx.fillStyle = '#0ff';
+            let legMove = Math.sin(Date.now() / 100) * 3;
+            ctx.fillRect(player.x + 5, drawY + drawHeight, 8, 8 + legMove);
+            ctx.fillRect(player.x + 22, drawY + drawHeight, 8, 8 - legMove);
+        }
+        
+        ctx.fillStyle = '#f0f';
+        ctx.shadowColor = '#f0f';
+        ctx.shadowBlur = 15;
+        obstacles.forEach(obs => {
+            drawRoundRect(ctx, obs.x, canvas.height - 100 - obs.height, obs.width, obs.height, 5);
+            ctx.fill();
+        });
+
+        ctx.shadowBlur = 0;
+        
+        update();
+        requestAnimationFrame(draw);
+    }
+
+    draw();
 }
