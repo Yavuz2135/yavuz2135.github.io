@@ -3,31 +3,51 @@ document.addEventListener("DOMContentLoaded", () => {
     const mainMenu = document.getElementById("main-menu");
     const gameContainer = document.getElementById("game-container");
 
-    // Splash ekranını 2 saniye sonra kaldır
-    setTimeout(() => {
-        splash.style.opacity = '0';
+    // 1. Splash Ekranı Kontrolü
+    if (splash) {
         setTimeout(() => {
-            splash.classList.add("hidden");
-            mainMenu.classList.remove("hidden");
-        }, 500);
-    }, 2000);
+            splash.style.opacity = '0';
+            setTimeout(() => {
+                splash.classList.add("hidden");
+                if (mainMenu) mainMenu.classList.remove("hidden");
+            }, 500);
+        }, 2000);
+    }
 
-    // Neon Velocity Başlatıcı
-    document.getElementById("btn-neon").onclick = () => {
-        mainMenu.classList.add("hidden");
-        gameContainer.classList.remove("hidden");
-        if (typeof initNeonVelocity === 'function') initNeonVelocity();
-    };
+    // 2. Oyun Başlatıcı (Hata Veren Kısım Düzeltildi)
+    const neonBtn = document.getElementById("btn-neon");
+    if (neonBtn) {
+        neonBtn.onclick = () => {
+            if (mainMenu) mainMenu.classList.add("hidden");
+            if (gameContainer) gameContainer.classList.remove("hidden");
+            
+            // Build hatasını önlemek için window üzerinden kontrol ediyoruz
+            if (typeof window.initNeonVelocity === 'function') {
+                window.initNeonVelocity();
+            } else {
+                console.error("Hata: initNeonVelocity fonksiyonu bulunamadı!");
+            }
+        };
+    }
 
-    // DONMA SORUNUNU ÇÖZEN KRİTİK ÇIKIŞ: Sayfayı yenilemek en temizidir
+    // 3. Menüye Dönüş Sistemi (Bellek Temizliği)
     const backToMenu = () => window.location.reload();
 
-    document.getElementById("btn-global-exit").onclick = backToMenu;
-    document.getElementById("btn-menu-exit").onclick = backToMenu;
+    const exitBtn = document.getElementById("btn-global-exit");
+    const menuExitBtn = document.getElementById("btn-menu-exit");
+    
+    if (exitBtn) exitBtn.onclick = backToMenu;
+    if (menuExitBtn) menuExitBtn.onclick = backToMenu;
 
-    // Tekrar Oyna
-    document.getElementById("btn-restart").onclick = () => {
-        document.getElementById("game-over-screen").classList.add("hidden");
-        initNeonVelocity(); 
-    };
+    // 4. Yeniden Başlatma
+    const restartBtn = document.getElementById("btn-restart");
+    if (restartBtn) {
+        restartBtn.onclick = () => {
+            const gameOverScreen = document.getElementById("game-over-screen");
+            if (gameOverScreen) gameOverScreen.classList.add("hidden");
+            if (typeof window.initNeonVelocity === 'function') {
+                window.initNeonVelocity();
+            }
+        };
+    }
 });
