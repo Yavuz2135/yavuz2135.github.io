@@ -1,56 +1,36 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <!-- Meta ve temel ayarlar -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="YavuKan Games - Neon Velocity ve daha fazlası!">
     <title>YavuKan Games</title>
-
-    <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-
-    <!-- Stil dosyası -->
     <link rel="stylesheet" href="assets/css/main.css">
 </head>
 <body>
 
-    <!-- Splash ekranı (logo korunuyor, hiçbir değişiklik yok) -->
     <div id="splash-screen" class="splash">
         <div id="yavukan-logo" class="logo">YavuKan</div>
     </div>
 
-    <!-- Ana Menü -->
     <div id="main-menu" class="container hidden">
         <header>
             <h1 class="glitch">YavuKan Games</h1>
         </header>
-
-        <div class="game-grid" id="game-grid">
-            <!-- Oyun kartları JS ile dinamik eklenecek -->
-        </div>
-
-        <footer>
-            <p>© 2026 YavuKan</p>
-        </footer>
+        <div class="game-grid" id="game-grid"></div>
+        <footer><p>© 2026 YavuKan</p></footer>
     </div>
 
-    <!-- Oyun Alanı (ortak canvas + UI katmanı) -->
     <div id="game-container" class="hidden">
         <canvas id="gameCanvas"></canvas>
-
-        <!-- Ortak UI katmanı -->
         <div id="ui-layer">
             <div id="score-board">
                 Skor: <span id="score">0</span>
-                <!-- Uzay fırtınası için ekstra UI elemanları buraya eklenebilir -->
                 <span id="lives" class="hidden"></span>
                 <span id="combo" class="hidden"></span>
             </div>
             <button id="btn-global-exit">ANA MENÜ</button>
         </div>
-
-        <!-- Oyun sonu ekranı (ortak kullanılacak) -->
         <div id="game-over-screen" class="hidden overlay">
             <h2>Oyun Bitti!</h2>
             <p>Skor: <span id="final-score">0</span></p>
@@ -60,9 +40,7 @@
         </div>
     </div>
 
-    <!-- Script'ler -->
     <script src="assets/js/utils.js"></script>
-    <script src="assets/js/game-loader.js"></script>
     <script src="main.js"></script>
 
 </body>
