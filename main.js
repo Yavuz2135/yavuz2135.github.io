@@ -1,75 +1,33 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Splash Screen ve YavuKan Logo Animasyonu
+    const splash = document.getElementById("splash-screen");
+    const mainMenu = document.getElementById("main-menu");
+    const gameContainer = document.getElementById("game-container");
+
+    // Splash ekranını 2 saniye sonra kaldır
     setTimeout(() => {
-        const splash = document.getElementById("splash-screen");
         splash.style.opacity = '0';
-        
         setTimeout(() => {
             splash.classList.add("hidden");
-            const mainMenu = document.getElementById("main-menu");
             mainMenu.classList.remove("hidden");
-            
-            // Kartların sırayla belirmesi (Sequential fade-in)
-            const cards = document.querySelectorAll('.game-card');
-            cards.forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                card.style.transition = 'all 0.5s ease ' + (index * 0.2) + 's';
-                
-                setTimeout(() => {
-                    card.style.opacity = card.classList.contains('locked') ? '0.6' : '1';
-                    card.style.transform = 'translateY(0)';
-                }, 50);
-            });
         }, 500);
     }, 2000);
 
-    // 2. Merkezi Oyun Başlatıcı (Game Manager)
-    function openGameContainer() {
-        document.getElementById("main-menu").classList.add("hidden");
-        document.getElementById("game-container").classList.remove("hidden");
-    }
+    // Neon Velocity Başlatıcı
+    document.getElementById("btn-neon").onclick = () => {
+        mainMenu.classList.add("hidden");
+        gameContainer.classList.remove("hidden");
+        if (typeof initNeonVelocity === 'function') initNeonVelocity();
+    };
 
-    // YENİ OYUN: Neon Velocity Başlatıcı
-    document.getElementById("btn-neon").addEventListener("click", () => {
-        openGameContainer();
-        if (typeof initNeonVelocity === 'function') {
-            initNeonVelocity();
-        } else {
-            console.error("Hata: neon-velocity.js yüklenemedi.");
-        }
-    });
+    // DONMA SORUNUNU ÇÖZEN KRİTİK ÇIKIŞ: Sayfayı yenilemek en temizidir
+    const backToMenu = () => window.location.reload();
 
-    // MEVCUT OYUN: Uzay Fırtınası Başlatıcı
-    document.getElementById("btn-oyun3").addEventListener("click", () => {
-        openGameContainer();
-        if (typeof initUzayFirtinasi === 'function') {
-            initUzayFirtinasi();
-        } else {
-            console.error("Hata: oyun3.js yüklenemedi.");
-        }
-    });
+    document.getElementById("btn-global-exit").onclick = backToMenu;
+    document.getElementById("btn-menu-exit").onclick = backToMenu;
 
-    // GELECEK OYUN: Placeholder
-    document.getElementById("btn-oyun2").addEventListener("click", () => {
-        if(document.getElementById("btn-oyun2").classList.contains('locked')) {
-            alert("Bu proje geliştirme aşamasındadır.");
-        }
-    });
-
-    // 3. Menü ve Arayüz Kontrolleri
-    document.getElementById("btn-menu").addEventListener("click", () => {
-        // Tüm aktif döngüleri durdurmak için sayfayı yenilemek en stabil yoldur
-        // Veya özel stop fonksiyonlarınızı çağırabilirsiniz
-        location.reload(); 
-    });
-
-    // Restart Butonu Kontrolü
-    document.getElementById("btn-restart").addEventListener("click", () => {
+    // Tekrar Oyna
+    document.getElementById("btn-restart").onclick = () => {
         document.getElementById("game-over-screen").classList.add("hidden");
-        // Hangi oyun aktifse onu yeniden başlat (Skoru sıfırlayarak)
-        const currentTitle = document.querySelector('.game-card.active h2').innerText;
-        if(currentTitle === "Neon Velocity") initNeonVelocity();
-        else initUzayFirtinasi();
-    });
+        initNeonVelocity(); 
+    };
 });
