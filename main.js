@@ -1,7 +1,6 @@
-// main.js - Ana sayfa mantığı, splash, menü ve oyun geçişi
+// main.js - Ana sayfa mantığı, splash, menü ve oyun yükleme
 
 document.addEventListener("DOMContentLoaded", () => {
-    // ── Element referansları ──
     const splash       = document.getElementById("splash-screen");
     const mainMenu     = document.getElementById("main-menu");
     const gameContainer = document.getElementById("game-container");
@@ -24,11 +23,9 @@ document.addEventListener("DOMContentLoaded", () => {
             script: "games/uzay-firtinasi/script.js",
             initFn: "initUzayFirtinasi"
         }
-        // Yeni oyun örneği:
-        // { id: "yeni-oyun", title: "Yeni Macera", script: "games/yeni-oyun/script.js", initFn: "initYeniOyun" }
     ];
 
-    // ── Splash ekranı otomatik kapanış ──
+    // Splash kapanışı
     if (splash) {
         setTimeout(() => {
             splash.style.opacity = "0";
@@ -39,10 +36,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 2200);
     }
 
-    // ── Oyun kartlarını dinamik oluştur ──
+    // Oyun kartlarını dinamik oluştur
     games.forEach(game => {
         const card = document.createElement("div");
-        card.className = "game-card active"; // şimdilik hepsi aktif, locked mantığı eklenebilir
+        card.className = "game-card active";
         card.id = `btn-${game.id}`;
         card.innerHTML = `
             <div class="card-content">
@@ -50,23 +47,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span class="play-btn">Oyna</span>
             </div>
         `;
-
         card.addEventListener("click", () => loadAndStartGame(game));
         gameGrid.appendChild(card);
     });
 
-    // ── Menüye dönüş fonksiyonu (bellek temizliği + reload yerine daha temiz) ──
+    // Menüye dönüş (temiz çıkış)
     function returnToMenu() {
-        // Aktif oyunun cleanup fonksiyonu varsa çağır
         if (window.currentGameCleanup) {
             window.currentGameCleanup();
             window.currentGameCleanup = null;
         }
-
         gameContainer.classList.add("hidden");
         mainMenu.classList.remove("hidden");
-
-        // UI'yi sıfırla
         document.getElementById("score").textContent = "0";
         document.getElementById("game-over-screen").classList.add("hidden");
         document.getElementById("lives")?.classList.add("hidden");
@@ -77,35 +69,30 @@ document.addEventListener("DOMContentLoaded", () => {
     btnGlobalExit?.addEventListener("click", returnToMenu);
     btnMenuExit?.addEventListener("click", returnToMenu);
 
-    // ── Oyun yükleme ve başlatma ──
+    // Oyun yükleme
     function loadAndStartGame(game) {
         mainMenu.classList.add("hidden");
         gameContainer.classList.remove("hidden");
 
-        // Önceki oyunun cleanup'ı varsa temizle
         if (window.currentGameCleanup) window.currentGameCleanup();
 
-        // Script dinamik yükle (cache önlemek için timestamp eklenebilir)
         const script = document.createElement("script");
         script.src = `${game.script}?v=${Date.now()}`;
         script.onload = () => {
             const initFn = window[game.initFn];
             if (typeof initFn === "function") {
-                window.currentGameCleanup = initFn();  // cleanup fonksiyonu dönerse sakla
+                window.currentGameCleanup = initFn();
             } else {
-                console.error(`Hata: ${game.initFn} fonksiyonu bulunamadı!`);
+                console.error(`init fonksiyonu bulunamadı: ${game.initFn}`);
             }
         };
         script.onerror = () => console.error(`Script yüklenemedi: ${game.script}`);
         document.body.appendChild(script);
     }
 
-    // Yeniden başlatma (aktif oyuna bağlı olarak init tekrar çağrılır)
+    // Yeniden başlatma
     btnRestart?.addEventListener("click", () => {
         document.getElementById("game-over-screen").classList.add("hidden");
-        if (window.currentGameCleanup && typeof window.currentGameCleanup === "function") {
-            // Bazı oyunlar restart metodu dönebilir, yoksa tekrar init
-            window.currentGameCleanup(); // cleanup + yeniden başlatma mantığı oyun içinde olmalı
-        }
+        // Oyun kendi restart mantığını kullanıyor
     });
 });
