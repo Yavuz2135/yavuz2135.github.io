@@ -2,75 +2,36 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Yavuz'un Oyunları</title>
+    <title>YavuKan Games</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="splash-screen" class="splash">
-        <div id="yavukan-logo" class="logo">YavuKan</div>
-    </div>
-
+    <div id="splash-screen" class="splash"><div id="yavukan-logo" class="logo">YavuKan</div></div>
+    
     <div id="main-menu" class="container hidden">
-        <header>
-            <h1 class="glitch" data-text="Yavuz'un Oyunları">Yavuz'un Oyunları</h1>
-        </header>
-
+        <h1>Yavuz'un Oyunları</h1>
         <div class="game-grid">
-            <div class="game-card active" id="btn-neon">
-                <div class="card-content">
-                    <h2>Neon Velocity</h2>
-                    <p>Hız ve Refleks</p>
-                    <span class="play-btn">Oyna</span>
-                </div>
-            </div>
-
-            <div class="game-card locked" id="btn-oyun2">
-                <div class="card-content">
-                    <h2>Gravity Sort</h2>
-                    <p>Yakında!</p>
-                </div>
-            </div>
-
-            <div class="game-card active" id="btn-oyun3">
-                <div class="card-content">
-                    <h2>Uzay Fırtınası</h2>
-                    <p>Aksiyon</p>
-                    <span class="play-btn">Oyna</span>
-                </div>
-            </div>
+            <div class="game-card active" id="btn-neon"><h2>Neon Velocity</h2></div>
+            <div class="game-card active" id="btn-oyun3"><h2>Uzay Fırtınası</h2></div>
         </div>
-        
-        <footer>
-            <p>&copy; 2026 YavuKan Games</p>
-        </footer>
     </div>
 
     <div id="game-container" class="hidden">
         <canvas id="gameCanvas"></canvas>
         <div id="ui-layer">
-            <div id="score-board">Skor: <span id="score">0</span></div>
-            <div id="combo-board">Combo: x<span id="combo">1</span></div>
-            <div id="lives">❤️❤️❤️</div>
+            <div>Skor: <span id="score">0</span></div>
+            <button id="btn-back-to-menu">MENÜ</button>
         </div>
-        
         <div id="game-over-screen" class="hidden overlay">
             <h2>Oyun Bitti</h2>
             <p>Skor: <span id="final-score">0</span></p>
-            <p>En Yüksek Skor: <span id="high-score">0</span></p>
-            
-            <div id="ad-space" style="margin: 15px 0; background: rgba(255,255,255,0.1); padding: 10px;">
-                <small>Reklam</small>
-            </div>
-
             <button id="btn-restart">Tekrar Oyna</button>
-            <button id="btn-menu">Menüye Dön</button>
         </div>
     </div>
 
     <script src="main.js"></script>
     <script src="oyun3.js"></script>
-    <script src="neon-velocity.js"></script>
+    <script src="oyun1.js"></script>
 </body>
 </html>
