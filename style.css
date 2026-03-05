@@ -3,8 +3,10 @@
     --primary: #0ff;
     --secondary: #f0f;
     --accent: #0f0;
+    --danger: #ff0055; /* Yeni oyunun engel rengi */
     --text: #fff;
     --font: 'Orbitron', sans-serif;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {
@@ -12,6 +14,7 @@
     padding: 0;
     box-sizing: border-box;
     user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -24,86 +27,161 @@ body {
 
 .hidden { display: none !important; }
 
-/* Splash Screen & Logo Anim */
+/* --- Splash Screen & YavuKan Logo --- */
 .splash {
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: #000; display: flex; justify-content: center; align-items: center;
-    z-index: 9999; transition: opacity 0.5s;
+    background: radial-gradient(circle, #111 0%, #000 100%);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 9999; transition: opacity 0.8s ease;
 }
+
 .logo {
-    font-size: 4rem; font-weight: 900; color: transparent;
-    -webkit-text-stroke: 2px var(--primary); text-shadow: 0 0 20px var(--primary);
+    font-size: clamp(3rem, 10vw, 6rem);
+    font-weight: 900;
+    color: transparent;
+    -webkit-text-stroke: 2px var(--primary);
+    text-shadow: 0 0 30px var(--primary);
     animation: pulse 2s infinite, wave 3s ease-in-out infinite;
+    letter-spacing: 5px;
 }
 
 @keyframes pulse {
-    0%, 100% { text-shadow: 0 0 20px var(--primary); }
-    50% { text-shadow: 0 0 40px var(--secondary), 0 0 60px var(--primary); -webkit-text-stroke: 2px var(--secondary); }
+    0%, 100% { text-shadow: 0 0 20px var(--primary); filter: brightness(1); }
+    50% { text-shadow: 0 0 50px var(--secondary), 0 0 20px var(--primary); -webkit-text-stroke: 2px var(--secondary); filter: brightness(1.3); }
 }
+
 @keyframes wave {
-    0%, 100% { transform: translateY(0) rotate(-2deg); }
-    50% { transform: translateY(-20px) rotate(2deg); }
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-15px) scale(1.05); }
 }
 
-/* Main Menu Grid */
+/* --- Main Menu --- */
 .container {
-    padding: 2rem; height: 100vh; display: flex; flex-direction: column; align-items: center;
-    background: radial-gradient(circle at center, #111, #000);
+    padding: 2rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: linear-gradient(180deg, #0a0a1a 0%, #000 100%);
 }
 
-header { margin-bottom: 3rem; }
+header { margin-bottom: 4rem; text-align: center; }
+
 .glitch {
-    font-size: 3rem; position: relative;
-    text-shadow: 0.05em 0 0 rgba(255,0,0,0.75), -0.025em -0.05em 0 rgba(0,255,0,0.75), 0.025em 0.05em 0 rgba(0,0,255,0.75);
-    animation: glitch 500ms infinite;
+    font-size: clamp(1.5rem, 5vw, 3rem);
+    position: relative;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 2px 2px var(--secondary), -2px -2px var(--primary);
 }
 
+/* --- Game Grid --- */
 .game-grid {
-    display: grid; grid-template-columns: 1fr; gap: 2rem; width: 100%; max-width: 1000px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2.5rem;
+    width: 100%;
+    max-width: 1200px;
 }
-@media (min-width: 768px) { .game-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 1024px) { .game-grid { grid-template-columns: repeat(3, 1fr); } }
 
 .game-card {
-    background: rgba(20, 20, 40, 0.8); border: 2px solid #333; border-radius: 15px;
-    padding: 2rem; text-align: center; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 2.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
 }
-.game-card::before {
-    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-    background: conic-gradient(transparent, rgba(0, 255, 255, 0.3), transparent 30%);
-    animation: rotate 4s linear infinite; opacity: 0; transition: opacity 0.3s;
+
+/* Yeni Oyun "Neon Velocity" için Özel Kenarlık Efekti */
+.game-card.active#btn-neon {
+    border: 2px solid var(--primary);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
 }
-@keyframes rotate { 100% { transform: rotate(360deg); } }
 
-.game-card.active { border-color: var(--primary); box-shadow: 0 0 20px rgba(0, 255, 255, 0.4); }
-.game-card.active:hover { transform: scale(1.05); box-shadow: 0 0 30px var(--primary); }
-.game-card.active:hover::before { opacity: 1; }
-.game-card.locked { opacity: 0.6; cursor: not-allowed; border-color: #555; }
-.card-content { position: relative; z-index: 1; }
-.game-card h2 { margin-bottom: 0.5rem; color: #fff; }
-.game-card.active p { color: var(--primary); font-weight: bold; }
-.game-card.locked p { color: #888; }
+.game-card.active:hover {
+    transform: translateY(-10px);
+    background: rgba(255, 255, 255, 0.07);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 20px var(--primary);
+}
 
-footer { margin-top: auto; color: #555; }
+.game-card.locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+    filter: grayscale(1);
+}
 
-/* Game UI Layer */
-#game-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; }
-canvas { display: block; width: 100%; height: 100%; }
+.card-content h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--text);
+}
+
+.play-btn {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.5rem 1.5rem;
+    border: 1px solid var(--primary);
+    border-radius: 50px;
+    font-size: 0.8rem;
+    color: var(--primary);
+    transition: var(--transition);
+}
+
+.game-card.active:hover .play-btn {
+    background: var(--primary);
+    color: #000;
+}
+
+/* --- Game UI & Overlay --- */
+#game-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #000;
+}
 
 #ui-layer {
-    position: absolute; top: 0; left: 0; width: 100%; padding: 1rem; display: flex; justify-content: space-between;
-    pointer-events: none; font-size: 1.5rem; text-shadow: 0 0 10px var(--primary);
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+    font-size: clamp(1rem, 3vw, 1.5rem);
+    z-index: 10;
 }
 
 .overlay {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.8); display: flex; flex-direction: column; justify-content: center; align-items: center;
-    gap: 1.5rem; backdrop-filter: blur(5px); pointer-events: auto;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 2rem;
+    text-align: center;
+    border: 1px solid var(--primary);
+    border-radius: 20px;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 1);
 }
-.overlay h2 { font-size: 3rem; color: var(--secondary); text-shadow: 0 0 20px var(--secondary); }
-.overlay button {
-    padding: 1rem 2rem; font-size: 1.2rem; font-family: var(--font); background: transparent;
-    color: var(--primary); border: 2px solid var(--primary); border-radius: 8px; cursor: pointer;
-    transition: all 0.2s; box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+
+#ad-space {
+    width: 100%;
+    max-width: 300px;
+    height: 100px;
+    border: 1px dashed #444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #444;
+    font-size: 0.7rem;
+    margin: 1rem 0;
 }
-.overlay button:hover { background: var(--primary); color: #000; box-shadow: 0 0 20px var(--primary); }
+
+footer {
+    padding: 2rem;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    opacity: 0.5;
+}
