@@ -8,34 +8,36 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Splash Screen with YavuKan Logo -->
     <div id="splash-screen" class="splash">
         <div id="yavukan-logo" class="logo">YavuKan</div>
     </div>
 
-    <!-- Main Menu Area -->
     <div id="main-menu" class="container hidden">
         <header>
             <h1 class="glitch" data-text="Yavuz'un Oyunları">Yavuz'un Oyunları</h1>
         </header>
 
         <div class="game-grid">
-            <div class="game-card locked" id="btn-oyun1">
+            <div class="game-card active" id="btn-neon">
                 <div class="card-content">
-                    <h2>Oyun 1</h2>
-                    <p>Yakında!</p>
+                    <h2>Neon Velocity</h2>
+                    <p>Hız ve Refleks</p>
+                    <span class="play-btn">Oyna</span>
                 </div>
             </div>
+
             <div class="game-card locked" id="btn-oyun2">
                 <div class="card-content">
-                    <h2>Oyun 2</h2>
+                    <h2>Gravity Sort</h2>
                     <p>Yakında!</p>
                 </div>
             </div>
+
             <div class="game-card active" id="btn-oyun3">
                 <div class="card-content">
                     <h2>Uzay Fırtınası</h2>
-                    <p>Oyna</p>
+                    <p>Aksiyon</p>
+                    <span class="play-btn">Oyna</span>
                 </div>
             </div>
         </div>
@@ -45,7 +47,6 @@
         </footer>
     </div>
 
-    <!-- Game Canvas and UI -->
     <div id="game-container" class="hidden">
         <canvas id="gameCanvas"></canvas>
         <div id="ui-layer">
@@ -53,10 +54,16 @@
             <div id="combo-board">Combo: x<span id="combo">1</span></div>
             <div id="lives">❤️❤️❤️</div>
         </div>
+        
         <div id="game-over-screen" class="hidden overlay">
             <h2>Oyun Bitti</h2>
             <p>Skor: <span id="final-score">0</span></p>
             <p>En Yüksek Skor: <span id="high-score">0</span></p>
+            
+            <div id="ad-space" style="margin: 15px 0; background: rgba(255,255,255,0.1); padding: 10px;">
+                <small>Reklam</small>
+            </div>
+
             <button id="btn-restart">Tekrar Oyna</button>
             <button id="btn-menu">Menüye Dön</button>
         </div>
@@ -64,5 +71,6 @@
 
     <script src="main.js"></script>
     <script src="oyun3.js"></script>
+    <script src="neon-velocity.js"></script>
 </body>
 </html>
