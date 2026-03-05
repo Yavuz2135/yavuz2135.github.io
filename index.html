@@ -13,37 +13,36 @@
     </div>
 
     <div id="main-menu" class="container hidden">
-        <header><h1 class="glitch" data-text="Yavuz'un Oyunları">Yavuz'un Oyunları</h1></header>
-        
-        <div class="game-grid" id="game-grid">
+        <header><h1 class="glitch">YavuKan Games</h1></header>
+        <div class="game-grid">
             <div class="game-card active" id="btn-neon">
-                <div class="card-content"><h2>Neon Velocity</h2><span class="play-btn">Oyna</span></div>
+                <div class="card-content">
+                    <h2>Neon Velocity</h2>
+                    <span class="play-btn">Oyna</span>
+                </div>
             </div>
-            <div class="game-card active" id="btn-oyun3">
-                <div class="card-content"><h2>Uzay Fırtınası</h2><span class="play-btn">Oyna</span></div>
-            </div>
-            <div class="game-card locked" id="btn-yeni-oyun">
-                <div class="card-content"><h2>Yakında...</h2></div>
+            <div class="game-card locked">
+                <div class="card-content"><h2>Yeni Proje</h2></div>
             </div>
         </div>
-        <footer><p>&copy; 2026 YavuKan Games</p></footer>
+        <footer><p>&copy; 2026 YavuKan</p></footer>
     </div>
 
     <div id="game-container" class="hidden">
         <canvas id="gameCanvas"></canvas>
         <div id="ui-layer">
             <div id="score-board">Skor: <span id="score">0</span></div>
-            <button id="btn-back-to-menu">MENÜYE DÖN</button>
+            <button id="btn-global-exit">MENÜ</button>
         </div>
         <div id="game-over-screen" class="hidden overlay">
             <h2>Oyun Bitti</h2>
             <p>Skor: <span id="final-score">0</span></p>
-            <button id="btn-restart">Tekrar Oyna</button>
+            <button id="btn-restart">TEKRAR</button>
+            <button id="btn-menu-exit">MENÜ</button>
         </div>
     </div>
 
     <script src="main.js"></script>
     <script src="oyun1.js"></script>
-    <script src="oyun3.js"></script>
 </body>
 </html>
