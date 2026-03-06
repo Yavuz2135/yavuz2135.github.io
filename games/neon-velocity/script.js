@@ -204,23 +204,21 @@ function initNeonVelocity() {
     // İlk döngüyü başlat
     gameLoop();
 
-    // ── Yeniden başlatma fonksiyonu ──
+        // ── Yeniden başlatma fonksiyonu ──
     function restart() {
         score = 0;
         gameActive = true;
         obstacles = [];
-        player.y = canvas.height - 150;     // resize güvenli pozisyon
+        player.y = canvas.height - 150; // resize güvenli pozisyon
         player.dy = 0;
         player.grounded = false;
         scoreEl.textContent = '0';
         gameOverScreen.classList.add('hidden');
     }
-
     // Restart butonuna bağla
     if (restartBtn) {
         restartBtn.onclick = restart;
     }
-
     // ── Temizlik fonksiyonu (menüye dönünce çağrılır) ──
     function cleanup() {
         if (animationFrameId) {
@@ -232,7 +230,9 @@ function initNeonVelocity() {
         // Ekstra temizlik: canvas'ı sıfırla (isteğe bağlı)
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
-
     // init fonksiyonu cleanup döner (main.js'te kullanılır)
     return cleanup;
 }
+
+// ← BURAYA EKLE (dosya en sonuna, return'den hemen sonra)
+window.initNeonVelocity = initNeonVelocity;
