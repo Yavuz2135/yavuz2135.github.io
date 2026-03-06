@@ -1,47 +1,90 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+    <!-- Meta ayarları: SEO ve mobil uyum -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="YavuKan Games - Neon Velocity ve daha eğlenceli oyunlar!">
     <title>YavuKan Games</title>
+
+    <!-- Favicon (isteğe bağlı - logo benzeri bir ikon ekleyebilirsin) -->
+    <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon">
+
+    <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <!-- Ana stil dosyası -->
     <link rel="stylesheet" href="assets/css/main.css">
 </head>
-<body>
+<body onload="resizeGameCanvasEarly()"> <!-- Erken canvas boyutlandırma için -->
 
+    <!-- Splash ekranı - logo korunuyor -->
     <div id="splash-screen" class="splash">
         <div id="yavukan-logo" class="logo">YavuKan</div>
     </div>
 
+    <!-- Ana Menü -->
     <div id="main-menu" class="container hidden">
         <header>
             <h1 class="glitch">YavuKan Games</h1>
         </header>
+
+        <!-- Oyun kartları dinamik olarak JS ile buraya eklenecek -->
         <div class="game-grid" id="game-grid"></div>
-        <footer><p>© 2026 YavuKan</p></footer>
+
+        <footer>
+            <p>© <span id="current-year"></span> YavuKan</p>
+        </footer>
     </div>
 
+    <!-- Ortak Oyun Alanı -->
     <div id="game-container" class="hidden">
-        <canvas id="gameCanvas"></canvas>
+        <!-- Canvas - oyun çizimleri burada -->
+        <canvas id="gameCanvas" role="img" aria-label="Oyun alanı"></canvas>
+
+        <!-- UI katmanı (skor, butonlar) -->
         <div id="ui-layer">
             <div id="score-board">
                 Skor: <span id="score">0</span>
-                <span id="lives" class="hidden"></span>
-                <span id="combo" class="hidden"></span>
+                <span id="lives" class="hidden"></span>     <!-- Uzay oyunu için -->
+                <span id="combo" class="hidden"></span>     <!-- Uzay oyunu için -->
             </div>
-            <button id="btn-global-exit">ANA MENÜ</button>
+            <!-- ANA MENÜ butonu - CSS ile sağ üstte küçük hale getirilecek -->
+            <button id="btn-global-exit" aria-label="Ana menüye dön">ANA MENÜ</button>
         </div>
+
+        <!-- Oyun sonu ekranı (ortak) -->
         <div id="game-over-screen" class="hidden overlay">
             <h2>Oyun Bitti!</h2>
             <p>Skor: <span id="final-score">0</span></p>
             <p id="high-score-container" class="hidden">En Yüksek: <span id="high-score">0</span></p>
-            <button id="btn-restart">TEKRAR OYNA</button>
-            <button id="btn-menu-exit">ANA MENÜYE DÖN</button>
+            <button id="btn-restart" aria-label="Tekrar oyna">TEKRAR OYNA</button>
+            <button id="btn-menu-exit" aria-label="Ana menüye dön">ANA MENÜYE DÖN</button>
+        </div>
+
+        <!-- Opsiyonel: Oyun yüklenirken gösterilecek loading -->
+        <div id="game-loading" class="hidden" style="position:absolute; inset:0; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center; color:#0ff; font-size:2rem; z-index:25;">
+            Yükleniyor...
         </div>
     </div>
 
+    <!-- Script'ler -->
+    <!-- utils.js opsiyonel - eğer boşsa kaldırabilirsin -->
     <script src="assets/js/utils.js"></script>
     <script src="main.js"></script>
+
+    <!-- Erken canvas boyutlandırma (sayfa yüklenir yüklenmez) -->
+    <script>
+        function resizeGameCanvasEarly() {
+            const canvas = document.getElementById('gameCanvas');
+            if (canvas) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            // Footer yılı dinamik yap
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+        }
+    </script>
 
 </body>
 </html>
