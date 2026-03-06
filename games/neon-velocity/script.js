@@ -25,7 +25,7 @@ function initNeonVelocity() {
         width: 35,
         height: 35,
         dy: 0,                    // Dikey hız
-        jumpForce: 20,
+        jumpForce: 10,
         gravity: 0.6,
         grounded: false
     };
