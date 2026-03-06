@@ -13,19 +13,6 @@ function initNeonVelocity() {
     const finalScoreEl = document.getElementById('final-score');
     const restartBtn = document.getElementById('btn-restart');
 
-    // ── Canvas boyutlarını yönet (resize güvenli) ──
-    let animationFrameId = null;
-
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        // Player pozisyonunu yeniden hesapla (yerden yüksekliği koru)
-        player.y = canvas.height - 150;
-        player.grounded = true; // Yeniden yere indir
-    }
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
     // ── Oyun durumu ──
     let score = 0;
     let gameActive = true;
@@ -42,6 +29,21 @@ function initNeonVelocity() {
         gravity: 0.6,
         grounded: false
     };
+
+    // ── Canvas boyutlarını yönet (resize güvenli) ──
+    let animationFrameId = null;
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Player pozisyonunu yeniden hesapla (yerden yüksekliği koru)
+        player.y = canvas.height - 150;
+        player.grounded = true; // Yeniden yere indir
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
 
     // ── Zıplama fonksiyonu ──
     function jump() {
@@ -92,7 +94,7 @@ function initNeonVelocity() {
             });
         }
 
-        // Engelleri güncelle ve çarpışma kontrol et (ters döngü = güvenli silme)
+        // Engelleri güncelle ve çarpışma kontrol et
         for (let i = obstacles.length - 1; i >= 0; i--) {
             const obs = obstacles[i];
             obs.x -= obs.speed;
@@ -106,7 +108,7 @@ function initNeonVelocity() {
                 gameActive = false;
                 finalScoreEl.textContent = score;
                 gameOverScreen.classList.remove('hidden');
-                return; // Erken çık, gereksiz döngü önle
+                return;
             }
 
             if (obs.x + obs.width < 0) {
@@ -136,103 +138,100 @@ function initNeonVelocity() {
     function draw() {
         if (!gameActive) return;
 
-        // Arka plan temizle
         ctx.fillStyle = '#050510';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Zemin çizgisi (neon glow)
         ctx.shadowBlur = 15;
         ctx.shadowColor = '#0ff';
         ctx.strokeStyle = '#0ff';
         ctx.lineWidth = 4;
+
         ctx.beginPath();
         ctx.moveTo(0, canvas.height - 100);
         ctx.lineTo(canvas.width, canvas.height - 100);
         ctx.stroke();
 
-        // Oyuncu çizimi
         ctx.shadowBlur = 20;
         ctx.shadowColor = '#0ff';
         ctx.fillStyle = '#0ff';
 
         let drawHeight = player.height;
         let drawY = player.y;
+
         if (!player.grounded) {
             drawHeight += 5;
-            drawY -= 5; // Zıplama efekti
+            drawY -= 5;
         }
+
         drawRoundRect(ctx, player.x, drawY, player.width, drawHeight, 5);
         ctx.fill();
 
-        // Gözler (beyaz parlak)
         ctx.shadowBlur = 10;
         ctx.shadowColor = '#fff';
         ctx.fillStyle = '#fff';
+
         ctx.fillRect(player.x + 8, drawY + 8, 6, 6);
         ctx.fillRect(player.x + 20, drawY + 8, 6, 6);
 
-        // Bacak animasyonu (sadece yerdeyken)
         if (player.grounded) {
             ctx.shadowBlur = 15;
             ctx.shadowColor = '#0ff';
             ctx.fillStyle = '#0ff';
+
             const legMove = Math.sin(Date.now() / 100) * 3;
+
             ctx.fillRect(player.x + 5, drawY + drawHeight, 8, 8 + legMove);
             ctx.fillRect(player.x + 22, drawY + drawHeight, 8, 8 - legMove);
         }
 
-        // Engeller (mor neon)
         ctx.shadowBlur = 15;
         ctx.shadowColor = '#f0f';
         ctx.fillStyle = '#f0f';
+
         obstacles.forEach(obs => {
             drawRoundRect(ctx, obs.x, canvas.height - 100 - obs.height, obs.width, obs.height, 5);
             ctx.fill();
         });
 
-        // Shadow sıfırla (performans için)
         ctx.shadowBlur = 0;
     }
 
-    // ── Ana oyun döngüsü ──
     function gameLoop() {
         update();
         draw();
         animationFrameId = requestAnimationFrame(gameLoop);
     }
 
-    // İlk döngüyü başlat
     gameLoop();
 
-        // ── Yeniden başlatma fonksiyonu ──
     function restart() {
         score = 0;
         gameActive = true;
         obstacles = [];
-        player.y = canvas.height - 150; // resize güvenli pozisyon
+        player.y = canvas.height - 150;
         player.dy = 0;
         player.grounded = false;
         scoreEl.textContent = '0';
         gameOverScreen.classList.add('hidden');
     }
-    // Restart butonuna bağla
+
     if (restartBtn) {
         restartBtn.onclick = restart;
     }
-    // ── Temizlik fonksiyonu (menüye dönünce çağrılır) ──
+
     function cleanup() {
         if (animationFrameId) {
             cancelAnimationFrame(animationFrameId);
         }
+
         document.removeEventListener('keydown', keyHandler);
         document.removeEventListener('touchstart', touchHandler);
         window.removeEventListener('resize', resizeCanvas);
-        // Ekstra temizlik: canvas'ı sıfırla (isteğe bağlı)
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
-    // init fonksiyonu cleanup döner (main.js'te kullanılır)
+
     return cleanup;
 }
 
-// ← BURAYA EKLE (dosya en sonuna, return'den hemen sonra)
 window.initNeonVelocity = initNeonVelocity;
