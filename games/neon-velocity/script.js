@@ -1,51 +1,47 @@
 // games/neon-velocity/script.js
-// Neon Velocity oyunu - modüler, cleanup destekli, resize güvenli hale getirildi
+// Neon Velocity - Mobil uyumlu hale getirildi (butonlar, ekran, engel spawn)
 
 function initNeonVelocity() {
-    // ── Canvas ve çizim context'i ──
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    if (!ctx) return null; // Canvas yoksa erken çık
+    if (!ctx) return null;
 
-    // ── UI elemanları ──
     const scoreEl = document.getElementById('score');
     const gameOverScreen = document.getElementById('game-over-screen');
     const finalScoreEl = document.getElementById('final-score');
     const restartBtn = document.getElementById('btn-restart');
 
-    // ── Oyun durumu ──
+    let animationFrameId = null;
+
+    // ── Mobil tam ekran canvas (devicePixelRatio ile yüksek çözünürlük) ──
+    function resizeCanvas() {
+        const dpr = window.devicePixelRatio || 1; // Mobil yüksek DPI
+        canvas.width = window.innerWidth * dpr;
+        canvas.height = window.innerHeight * dpr;
+        canvas.style.width = window.innerWidth + 'px';
+        canvas.style.height = window.innerHeight + 'px';
+        ctx.scale(dpr, dpr); // Çözünürlük ölçekle
+        player.y = canvas.height / dpr - 150; // DPI düzelt
+        player.grounded = true;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
     let score = 0;
     let gameActive = true;
     let obstacles = [];
 
-    // ── Oyuncu nesnesi ──
     const player = {
-        x: 80,                    // Soldan sabit mesafe
-        y: canvas.height - 150,   // Başlangıç yüksekliği
+        x: 80,
+        y: canvas.height / (window.devicePixelRatio || 1) - 150,
         width: 35,
         height: 35,
-        dy: 0,                    // Dikey hız
-        jumpForce: 10,
-        gravity: 0.6,
+        dy: 0,
+        jumpForce: 15,
+        gravity: 0.75,
         grounded: false
     };
 
-    // ── Canvas boyutlarını yönet (resize güvenli) ──
-    let animationFrameId = null;
-
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        // Player pozisyonunu yeniden hesapla (yerden yüksekliği koru)
-        player.y = canvas.height - 150;
-        player.grounded = true; // Yeniden yere indir
-    }
-
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    // ── Zıplama fonksiyonu ──
     function jump() {
         if (player.grounded && gameActive) {
             player.dy = -player.jumpForce;
@@ -53,14 +49,12 @@ function initNeonVelocity() {
         }
     }
 
-    // ── Kontrol event'leri ──
     const keyHandler = (e) => {
         if (e.code === 'Space') {
             e.preventDefault();
             jump();
         }
     };
-
     const touchHandler = (e) => {
         e.preventDefault();
         jump();
@@ -69,32 +63,29 @@ function initNeonVelocity() {
     document.addEventListener('keydown', keyHandler);
     document.addEventListener('touchstart', touchHandler, { passive: false });
 
-    // ── Oyun mantığı güncelleme ──
     function update() {
         if (!gameActive) return;
 
-        // Yerçekimi uygula
         player.dy += player.gravity;
         player.y += player.dy;
 
-        const groundY = canvas.height - 100;
+        const groundY = canvas.height / (window.devicePixelRatio || 1) - 100;
         if (player.y + player.height > groundY) {
             player.y = groundY - player.height;
             player.dy = 0;
             player.grounded = true;
         }
 
-        // Rastgele engel oluştur (zorluk score'a göre artar)
-        if (Math.random() < 0.02) {
+        // Engel spawn iyileştirildi: oran düşürüldü + x sola kaydırıldı (mobil'de önceden görünür)
+        if (Math.random() < 0.015) { // 0.02'den 0.015'e düşürüldü (aniden çıkma önlendi)
             obstacles.push({
-                x: canvas.width,
+                x: canvas.width / (window.devicePixelRatio || 1) + 100, // +100px önceden görünür
                 width: 40,
                 height: 50 + Math.random() * 50,
                 speed: 8 + (score / 10)
             });
         }
 
-        // Engelleri güncelle ve çarpışma kontrol et
         for (let i = obstacles.length - 1; i >= 0; i--) {
             const obs = obstacles[i];
             obs.x -= obs.speed;
@@ -119,7 +110,6 @@ function initNeonVelocity() {
         }
     }
 
-    // ── Yuvarlak dikdörtgen çizim yardımcı fonksiyonu ──
     function drawRoundRect(ctx, x, y, w, h, r) {
         ctx.beginPath();
         ctx.moveTo(x + r, y);
@@ -134,21 +124,19 @@ function initNeonVelocity() {
         ctx.closePath();
     }
 
-    // ── Çizim fonksiyonu ──
     function draw() {
         if (!gameActive) return;
 
         ctx.fillStyle = '#050510';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, canvas.width / (window.devicePixelRatio || 1), canvas.height / (window.devicePixelRatio || 1));
 
         ctx.shadowBlur = 15;
         ctx.shadowColor = '#0ff';
         ctx.strokeStyle = '#0ff';
         ctx.lineWidth = 4;
-
         ctx.beginPath();
-        ctx.moveTo(0, canvas.height - 100);
-        ctx.lineTo(canvas.width, canvas.height - 100);
+        ctx.moveTo(0, canvas.height / (window.devicePixelRatio || 1) - 100);
+        ctx.lineTo(canvas.width / (window.devicePixelRatio || 1), canvas.height / (window.devicePixelRatio || 1) - 100);
         ctx.stroke();
 
         ctx.shadowBlur = 20;
@@ -157,19 +145,16 @@ function initNeonVelocity() {
 
         let drawHeight = player.height;
         let drawY = player.y;
-
         if (!player.grounded) {
             drawHeight += 5;
             drawY -= 5;
         }
-
         drawRoundRect(ctx, player.x, drawY, player.width, drawHeight, 5);
         ctx.fill();
 
         ctx.shadowBlur = 10;
         ctx.shadowColor = '#fff';
         ctx.fillStyle = '#fff';
-
         ctx.fillRect(player.x + 8, drawY + 8, 6, 6);
         ctx.fillRect(player.x + 20, drawY + 8, 6, 6);
 
@@ -177,9 +162,7 @@ function initNeonVelocity() {
             ctx.shadowBlur = 15;
             ctx.shadowColor = '#0ff';
             ctx.fillStyle = '#0ff';
-
             const legMove = Math.sin(Date.now() / 100) * 3;
-
             ctx.fillRect(player.x + 5, drawY + drawHeight, 8, 8 + legMove);
             ctx.fillRect(player.x + 22, drawY + drawHeight, 8, 8 - legMove);
         }
@@ -187,9 +170,8 @@ function initNeonVelocity() {
         ctx.shadowBlur = 15;
         ctx.shadowColor = '#f0f';
         ctx.fillStyle = '#f0f';
-
         obstacles.forEach(obs => {
-            drawRoundRect(ctx, obs.x, canvas.height - 100 - obs.height, obs.width, obs.height, 5);
+            drawRoundRect(ctx, obs.x, canvas.height / (window.devicePixelRatio || 1) - 100 - obs.height, obs.width, obs.height, 5);
             ctx.fill();
         });
 
@@ -204,34 +186,36 @@ function initNeonVelocity() {
 
     gameLoop();
 
+    // ── Mobil uyumlu restart (click + touch) ──
     function restart() {
         score = 0;
         gameActive = true;
         obstacles = [];
-        player.y = canvas.height - 150;
+        player.y = canvas.height / (window.devicePixelRatio || 1) - 150;
         player.dy = 0;
         player.grounded = false;
         scoreEl.textContent = '0';
         gameOverScreen.classList.add('hidden');
+        resizeCanvas(); // Yeniden boyutlandır
+        gameLoop(); // Döngüyü yeniden başlat
     }
 
     if (restartBtn) {
-        restartBtn.onclick = restart;
+        restartBtn.addEventListener('click', restart); // Mobil click desteği
+        restartBtn.addEventListener('touchstart', restart, { passive: false }); // Touch desteği
     }
 
     function cleanup() {
         if (animationFrameId) {
             cancelAnimationFrame(animationFrameId);
         }
-
         document.removeEventListener('keydown', keyHandler);
         document.removeEventListener('touchstart', touchHandler);
         window.removeEventListener('resize', resizeCanvas);
-
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
     return cleanup;
 }
 
-window.initNeonVelocity = initNeonVelocity;
+window.initNeonVelocity = initNeonVelocity; // Global bağlama (main.js için zorunlu)
