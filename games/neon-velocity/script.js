@@ -1,20 +1,26 @@
 // games/neon-velocity/script.js
-// Neon Velocity - Sıralama hatası düzeltildi (resizeCanvas player'dan sonra)
+// Bütün hatalar temizlendi: sıralama, canvas ölçek, mobil touch, loading takılması, restart
 
 function initNeonVelocity() {
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
+    if (!ctx) {
+        console.error("Canvas context alınamadı");
+        return null;
+    }
 
     const scoreEl = document.getElementById('score');
     const gameOverScreen = document.getElementById('game-over-screen');
     const finalScoreEl = document.getElementById('final-score');
     const restartBtn = document.getElementById('btn-restart');
+    const loadingEl = document.getElementById('game-loading');
 
     let animationFrameId = null;
+    let gameActive = true;
+    let score = 0;
+    let obstacles = [];
 
-    // ── Canvas boyut yönetimi (player tanımlandıktan SONRA çağrılır) ──
-    let player = null; // Player önce tanımlanır, sonra resize günceller
+    // Canvas ölçekleme (mobil yüksek çözünürlük için)
     function resizeCanvas() {
         const dpr = window.devicePixelRatio || 1;
         canvas.width = window.innerWidth * dpr;
@@ -22,22 +28,12 @@ function initNeonVelocity() {
         canvas.style.width = window.innerWidth + 'px';
         canvas.style.height = window.innerHeight + 'px';
         ctx.scale(dpr, dpr);
-        // Player varsa pozisyonunu güncelle (güvenli)
-        if (player) {
-            player.y = (canvas.height / dpr) - 150;
-            player.grounded = true;
-        }
     }
 
-    // ── Oyun durumu ──
-    let score = 0;
-    let gameActive = true;
-    let obstacles = [];
-
-    // ── Oyuncu nesnesi (resizeCanvas'tan SONRA tanımlandı) ──
-    player = {
+    // Oyuncu nesnesi (resize'dan SONRA tanımlanır)
+    let player = {
         x: 80,
-        y: 0, // Geçici - resizeCanvas güncelleyecek
+        y: 0, // resize güncelleyecek
         width: 35,
         height: 35,
         dy: 0,
@@ -46,8 +42,11 @@ function initNeonVelocity() {
         grounded: false
     };
 
-    // Şimdi resizeCanvas çağrılabilir (player tanımlı)
+    // İlk resize (player y'yi ayarlar)
     resizeCanvas();
+    player.y = (canvas.height / (window.devicePixelRatio || 1)) - 150;
+    player.grounded = true;
+
     window.addEventListener('resize', resizeCanvas);
 
     function jump() {
@@ -57,19 +56,18 @@ function initNeonVelocity() {
         }
     }
 
-    const keyHandler = (e) => {
+    // Kontroller (mobil + masaüstü)
+    document.addEventListener('keydown', (e) => {
         if (e.code === 'Space') {
             e.preventDefault();
             jump();
         }
-    };
-    const touchHandler = (e) => {
+    });
+
+    document.addEventListener('touchstart', (e) => {
         e.preventDefault();
         jump();
-    };
-
-    document.addEventListener('keydown', keyHandler);
-    document.addEventListener('touchstart', touchHandler, { passive: false });
+    }, { passive: false });
 
     function update() {
         if (!gameActive) return;
@@ -84,6 +82,7 @@ function initNeonVelocity() {
             player.grounded = true;
         }
 
+        // Engel spawn (mobil'de görünür olması için x +100)
         if (Math.random() < 0.015) {
             obstacles.push({
                 x: (canvas.width / (window.devicePixelRatio || 1)) + 100,
@@ -124,4 +123,109 @@ function initNeonVelocity() {
         ctx.quadraticCurveTo(x + w, y, x + w, y + r);
         ctx.lineTo(x + w, y + h - r);
         ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-        ctx.lineTo(x + r,
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+    }
+
+    function draw() {
+        if (!gameActive) return;
+
+        const cw = canvas.width / (window.devicePixelRatio || 1);
+        const ch = canvas.height / (window.devicePixelRatio || 1);
+
+        ctx.fillStyle = '#050510';
+        ctx.fillRect(0, 0, cw, ch);
+
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = '#0ff';
+        ctx.strokeStyle = '#0ff';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(0, ch - 100);
+        ctx.lineTo(cw, ch - 100);
+        ctx.stroke();
+
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = '#0ff';
+        ctx.fillStyle = '#0ff';
+
+        let drawHeight = player.height;
+        let drawY = player.y;
+        if (!player.grounded) {
+            drawHeight += 5;
+            drawY -= 5;
+        }
+        drawRoundRect(ctx, player.x, drawY, player.width, drawHeight, 5);
+        ctx.fill();
+
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#fff';
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(player.x + 8, drawY + 8, 6, 6);
+        ctx.fillRect(player.x + 20, drawY + 8, 6, 6);
+
+        if (player.grounded) {
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#0ff';
+            ctx.fillStyle = '#0ff';
+            const legMove = Math.sin(Date.now() / 100) * 3;
+            ctx.fillRect(player.x + 5, drawY + drawHeight, 8, 8 + legMove);
+            ctx.fillRect(player.x + 22, drawY + drawHeight, 8, 8 - legMove);
+        }
+
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = '#f0f';
+        ctx.fillStyle = '#f0f';
+        obstacles.forEach(obs => {
+            drawRoundRect(ctx, obs.x, ch - 100 - obs.height, obs.width, obs.height, 5);
+            ctx.fill();
+        });
+
+        ctx.shadowBlur = 0;
+    }
+
+    function gameLoop() {
+        update();
+        draw();
+        animationFrameId = requestAnimationFrame(gameLoop);
+    }
+
+    // İlk döngü
+    gameLoop();
+
+    // Restart (mobil uyumlu)
+    function restart() {
+        score = 0;
+        gameActive = true;
+        obstacles = [];
+        resizeCanvas(); // Yeniden boyutlandır
+        player.y = (canvas.height / (window.devicePixelRatio || 1)) - 150;
+        player.dy = 0;
+        player.grounded = false;
+        scoreEl.textContent = '0';
+        gameOverScreen.classList.add('hidden');
+        if (loadingEl) loadingEl.classList.add('hidden');
+    }
+
+    if (restartBtn) {
+        restartBtn.addEventListener('click', restart);
+        restartBtn.addEventListener('touchstart', restart, { passive: false });
+    }
+
+    function cleanup() {
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        document.removeEventListener('keydown', keyHandler);
+        document.removeEventListener('touchstart', touchHandler);
+        window.removeEventListener('resize', resizeCanvas);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (loadingEl) loadingEl.classList.add('hidden');
+    }
+
+    return cleanup;
+}
+
+// Global bağlama (main.js bulsun)
+window.initNeonVelocity = initNeonVelocity;
