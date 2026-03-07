@@ -158,28 +158,101 @@ function initNeonVelocity() {
         }
     }
 
-    function update() {
-        if (!gameActive) return;
+    // ── YENİ GÜZEL KARAKTER: Neon Cyberpunk Robot ──
+function drawPlayer() {
+    const cw = canvas.width / (window.devicePixelRatio || 1);
+    const ch = canvas.height / (window.devicePixelRatio || 1);
+    const px = player.x;
+    const py = player.y;
+    const time = Date.now() / 1000; // Animasyon zamanı
 
-        player.dy += player.gravity;
-        player.y += player.dy;
+    // Aura glow (mavi halka)
+    ctx.shadowBlur = 30;
+    ctx.shadowColor = '#0ff';
+    ctx.beginPath();
+    ctx.arc(px + player.width / 2, py + player.height / 2, player.width / 1.5, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(0, 255, 255, 0.3)';
+    ctx.lineWidth = 5;
+    ctx.stroke();
 
-        const groundY = (canvas.height / (window.devicePixelRatio || 1)) - 100;
-        if (player.y + player.height > groundY) {
-            player.y = groundY - player.height;
-            player.dy = 0;
-            player.grounded = true;
-        }
+    // Gövde (yuvarlak dikdörtgen + neon hatlar)
+    ctx.shadowBlur = 25;
+    ctx.shadowColor = '#0ff';
+    ctx.fillStyle = '#0ff';
+    drawRoundRect(ctx, px + 5, py + 5, player.width - 10, player.height - 10, 8);
+    ctx.fill();
 
-        // Engel spawn
-        if (Math.random() < 0.015) {
-            obstacles.push({
-                x: (canvas.width / (window.devicePixelRatio || 1)) + 100,
-                width: 40,
-                height: 50 + Math.random() * 50,
-                speed: 8 + (score / 10)
-            });
-        }
+    // Neon gövde hatları (cyberpunk efekt)
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = '#f0f';
+    ctx.strokeStyle = '#f0f';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(px + 10, py + 15);
+    ctx.lineTo(px + player.width - 15, py + 15); // Üst hat
+    ctx.moveTo(px + 10, py + player.height / 2);
+    ctx.lineTo(px + player.width - 15, py + player.height / 2); // Orta hat
+    ctx.stroke();
+
+    // Kafa (küçük yuvarlak + anten)
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = '#fff';
+    ctx.fillStyle = '#0ff';
+    drawRoundRect(ctx, px + 12, py - 8, 18, 20, 9); // Kafa
+    ctx.fill();
+
+    // Anten (titreyen)
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = '#f0f';
+    ctx.strokeStyle = '#f0f';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(px + player.width / 2, py - 8);
+    ctx.lineTo(px + player.width / 2 + Math.sin(time * 5) * 2, py - 25); // Titreyen anten
+    ctx.stroke();
+
+    // Gözler (parlayan beyaz)
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = '#fff';
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(px + 18, py + 2, 4, 0, Math.PI * 2); // Sol göz
+    ctx.arc(px + 26, py + 2, 4, 0, Math.PI * 2); // Sağ göz
+    ctx.fill();
+
+    // Kollar (animasyonlu sallanma)
+    ctx.shadowBlur = 18;
+    ctx.shadowColor = '#0ff';
+    ctx.strokeStyle = '#0ff';
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    const armSwing = Math.sin(time * 8) * 3; // Sallanma
+    ctx.beginPath();
+    ctx.moveTo(px + 5, py + 15);
+    ctx.lineTo(px - 5 + armSwing, py + 25); // Sol kol
+    ctx.moveTo(px + player.width, py + 15);
+    ctx.lineTo(px + player.width + 5 - armSwing, py + 25); // Sağ kol
+    ctx.stroke();
+
+    // Bacaklar (koşma animasyonu - mevcut kodun geliştirilmiş hali)
+    if (player.grounded) {
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = '#0ff';
+        ctx.strokeStyle = '#0ff';
+        ctx.lineWidth = 6;
+        ctx.lineCap = 'round';
+        const legMove = Math.sin(time * 12) * 5; // Hızlı koşma sallanması
+        ctx.beginPath();
+        ctx.moveTo(px + 8, py + player.height);
+        ctx.lineTo(px + 8 + legMove, py + player.height + 15); // Sol bacak
+        ctx.moveTo(px + player.width - 8, py + player.height);
+        ctx.lineTo(px + player.width - 8 - legMove, py + player.height + 15); // Sağ bacak
+        ctx.stroke();
+    }
+
+    ctx.shadowBlur = 0; // Temizle
+}
 
         for (let i = obstacles.length - 1; i >= 0; i--) {
             const obs = obstacles[i];
