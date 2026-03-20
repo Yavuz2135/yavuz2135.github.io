@@ -109,7 +109,7 @@
         });
     }
 
-    // Rastgele yıldız arka plan
+    // Yıldız arka plan
     for(let i=0;i<100;i++){
         stars.push({
             x: Math.random()*cw,
@@ -127,7 +127,7 @@
         if(keys['ArrowRight'] && player.x+player.width<cw) player.x += player.speed;
         if(keys['Space']) shoot();
 
-        // Yıldız hareketi
+        // Yıldızlar
         stars.forEach(s=>{
             s.y += s.speed;
             if(s.y>ch){
@@ -252,7 +252,6 @@
 
     // Başlat
     gameLoop();
-
 })();
 </script>
 </body>
