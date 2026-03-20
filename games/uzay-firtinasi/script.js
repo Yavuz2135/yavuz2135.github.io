@@ -1,4 +1,4 @@
-// games/uzay-firtinasi/script.js - EN TEMİZ VERSİYON (ilk söylediğim)
+// games/uzay-firtinasi/script.js - DONMA VE HAREKET SORUNU ÇÖZÜLDÜ
 function initUzayFirtinasi() {
     const canvas = document.getElementById('gameCanvas');
     if (!canvas) return null;
@@ -11,12 +11,14 @@ function initUzayFirtinasi() {
     const finalScoreEl = document.getElementById('final-score');
     const restartBtn = document.getElementById('btn-restart');
     const loadingEl = document.getElementById('game-loading');
+    const btnMenuExit = document.getElementById('btn-menu-exit'); // ana menü butonu
 
     let animationFrameId = null;
     let gameActive = true;
     let score = 0;
     let lives = 3;
 
+    // Canvas
     function resizeCanvas() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
@@ -26,13 +28,15 @@ function initUzayFirtinasi() {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    const stars = Array.from({length: 40}, () => ({
+    // Yıldızlar
+    const stars = Array.from({length:40}, () => ({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        size: Math.random() * 1.2 + 0.4,
-        speed: Math.random() * 0.6 + 0.2
+        size: Math.random()*1.2 + 0.4,
+        speed: Math.random()*0.6 + 0.2
     }));
 
+    // Oyuncu
     const player = {
         x: canvas.width / 2 - 32,
         y: canvas.height - 120,
@@ -47,12 +51,14 @@ function initUzayFirtinasi() {
     let enemies = [];
     let powerups = [];
 
+    // Kontroller
     let moveTouchId = null;
     let moveDelta = 0;
     let fireActive = false;
 
     function handleTouchStart(e) {
         e.preventDefault();
+        if (!gameActive) return;
         for (let t of e.changedTouches) {
             const tx = t.clientX;
             if (tx < window.innerWidth * 0.5) {
@@ -66,7 +72,7 @@ function initUzayFirtinasi() {
 
     function handleTouchMove(e) {
         e.preventDefault();
-        if (moveTouchId === null) return;
+        if (!gameActive || moveTouchId === null) return;
         for (let t of e.touches) {
             if (t.identifier === moveTouchId) {
                 moveDelta = (t.clientX - window.innerWidth / 4) / (window.innerWidth / 4);
@@ -77,6 +83,7 @@ function initUzayFirtinasi() {
 
     function handleTouchEnd(e) {
         e.preventDefault();
+        if (!gameActive) return;
         for (let t of e.changedTouches) {
             if (t.identifier === moveTouchId) {
                 moveTouchId = null;
@@ -87,16 +94,17 @@ function initUzayFirtinasi() {
         }
     }
 
-    canvas.addEventListener('touchstart', handleTouchStart, {passive: false});
-    canvas.addEventListener('touchmove', handleTouchMove, {passive: false});
-    canvas.addEventListener('touchend', handleTouchEnd, {passive: false});
-    canvas.addEventListener('touchcancel', handleTouchEnd, {passive: false});
+    canvas.addEventListener('touchstart', handleTouchStart, {passive:false});
+    canvas.addEventListener('touchmove', handleTouchMove, {passive:false});
+    canvas.addEventListener('touchend', handleTouchEnd, {passive:false});
+    canvas.addEventListener('touchcancel', handleTouchEnd, {passive:false});
 
     let keys = {};
-    document.addEventListener('keydown', e => keys[e.code] = true);
-    document.addEventListener('keyup', e => keys[e.code] = false);
+    document.addEventListener('keydown', e => { keys[e.code] = true; });
+    document.addEventListener('keyup', e => { keys[e.code] = false; });
 
     function shoot() {
+        if (!gameActive) return;
         const now = Date.now();
         if (now - player.lastShot < player.fireRate) return;
         player.lastShot = now;
@@ -171,8 +179,12 @@ function initUzayFirtinasi() {
 
     function endGame() {
         gameActive = false;
+        cancelAnimationFrame(animationFrameId);
         finalScoreEl.textContent = score;
         gameOverScreen.classList.remove('hidden');
+        // Butonları aktif tut
+        if (restartBtn) restartBtn.disabled = false;
+        if (btnMenuExit) btnMenuExit.disabled = false;
     }
 
     function updateLivesUI() {
@@ -211,6 +223,7 @@ function initUzayFirtinasi() {
     }
 
     function gameLoop() {
+        if (!gameActive) return;
         update();
         draw();
         animationFrameId = requestAnimationFrame(gameLoop);
@@ -228,6 +241,7 @@ function initUzayFirtinasi() {
         gameOverScreen.classList.add('hidden');
         if (loadingEl) loadingEl.classList.add('hidden');
         gameActive = true;
+        gameLoop(); // loop'u yeniden başlat
     }
 
     if (restartBtn) {
@@ -235,8 +249,29 @@ function initUzayFirtinasi() {
         restartBtn.addEventListener('touchstart', restart, {passive:false});
     }
 
+    // ANA MENÜ BUTONU (önemli!)
+    if (btnMenuExit) {
+        btnMenuExit.addEventListener('click', () => {
+            gameActive = false;
+            cancelAnimationFrame(animationFrameId);
+            gameOverScreen.classList.add('hidden');
+            // main.js'deki returnToMenu() fonksiyonunu çağır
+            if (window.returnToMenu && typeof window.returnToMenu === 'function') {
+                window.returnToMenu();
+            }
+        });
+        btnMenuExit.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            gameActive = false;
+            cancelAnimationFrame(animationFrameId);
+            gameOverScreen.classList.add('hidden');
+            if (window.returnToMenu) window.returnToMenu();
+        }, {passive:false});
+    }
+
     function cleanup() {
-        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        gameActive = false;
+        cancelAnimationFrame(animationFrameId);
         canvas.removeEventListener('touchstart', handleTouchStart);
         canvas.removeEventListener('touchmove', handleTouchMove);
         canvas.removeEventListener('touchend', handleTouchEnd);
