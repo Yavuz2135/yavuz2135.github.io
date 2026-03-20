@@ -1,5 +1,5 @@
 // games/neon-velocity/script.js
-// Bütün hatalar temizlendi: illegal return düzeltildi, sıralama doğru, çalışır halde
+// Double jump ve bütün hatalar düzeltilmiş sürüm
 
 function initNeonVelocity() {
     const canvas = document.getElementById('gameCanvas');
@@ -27,6 +27,7 @@ function initNeonVelocity() {
         canvas.height = window.innerHeight * dpr;
         canvas.style.width = window.innerWidth + 'px';
         canvas.style.height = window.innerHeight + 'px';
+        ctx.setTransform(1, 0, 0, 1, 0, 0); // scale reset
         ctx.scale(dpr, dpr);
     }
 
@@ -39,10 +40,10 @@ function initNeonVelocity() {
         dy: 0,
         jumpForce: 15,
         gravity: 0.75,
-        grounded: false
+        grounded: false,
+        jumpsLeft: 2 // double jump için
     };
 
-    // İlk resize
     resizeCanvas();
     player.y = (canvas.height / (window.devicePixelRatio || 1)) - 150;
     player.grounded = true;
@@ -50,24 +51,30 @@ function initNeonVelocity() {
     window.addEventListener('resize', resizeCanvas);
 
     function jump() {
-        if (player.grounded && gameActive) {
+        if (!gameActive) return;
+
+        if (player.grounded || player.jumpsLeft > 0) {
             player.dy = -player.jumpForce;
             player.grounded = false;
+            player.jumpsLeft--;
         }
     }
 
     // Kontroller
-    document.addEventListener('keydown', (e) => {
+    function keyHandler(e) {
         if (e.code === 'Space') {
             e.preventDefault();
             jump();
         }
-    });
+    }
 
-    document.addEventListener('touchstart', (e) => {
+    function touchHandler(e) {
         e.preventDefault();
         jump();
-    }, { passive: false });
+    }
+
+    document.addEventListener('keydown', keyHandler);
+    document.addEventListener('touchstart', touchHandler, { passive: false });
 
     function update() {
         if (!gameActive) return;
@@ -80,6 +87,7 @@ function initNeonVelocity() {
             player.y = groundY - player.height;
             player.dy = 0;
             player.grounded = true;
+            player.jumpsLeft = 2; // yere bastığında jump hakkı reset
         }
 
         if (Math.random() < 0.015) {
@@ -202,6 +210,7 @@ function initNeonVelocity() {
         player.y = (canvas.height / (window.devicePixelRatio || 1)) - 150;
         player.dy = 0;
         player.grounded = false;
+        player.jumpsLeft = 2; // restart ile jump hakkı reset
         scoreEl.textContent = '0';
         gameOverScreen.classList.add('hidden');
         if (loadingEl) loadingEl.classList.add('hidden');
@@ -219,10 +228,10 @@ function initNeonVelocity() {
         window.removeEventListener('resize', resizeCanvas);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         if (loadingEl) loadingEl.classList.add('hidden');
-        return;  // ← BURADA return var, fonksiyon içinde – illegal değil
+        return;
     }
 
-    return cleanup;  // ← cleanup fonksiyonu return ediyor – dosya sonu değil!
+    return cleanup;
 }
 
 // Global bağlama
