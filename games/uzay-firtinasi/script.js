@@ -1,4 +1,4 @@
-// games/uzay-firtinasi/script.js
+// games/uzay-firtinasi/script.js - Mobil düzeltilmiş + tüm özellikler korunmuş
 function initUzayFirtinasi() {
     const canvas = document.getElementById('gameCanvas');
     if (!canvas) return null;
@@ -24,22 +24,16 @@ function initUzayFirtinasi() {
         const dpr = window.devicePixelRatio || 1;
         canvas.width = window.innerWidth * dpr;
         canvas.height = window.innerHeight * dpr;
-        canvas.style.width = window.innerWidth + 'px';
-        canvas.style.height = window.innerHeight + 'px';
+        canvas.style.width = `${window.innerWidth}px`;
+        canvas.style.height = `${window.innerHeight}px`;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // Yıldızlar (2 katman)
-    const starsSlow = Array.from({length: 80}, () => ({
-        x: Math.random()*2000, y: Math.random()*2000,
-        size: Math.random()*1.8 + 0.6, speed: Math.random()*0.8 + 0.3
-    }));
-    const starsFast = Array.from({length: 60}, () => ({
-        x: Math.random()*2000, y: Math.random()*2000,
-        size: Math.random()*2.5 + 1, speed: Math.random()*2 + 1.2
-    }));
+    // Yıldızlar
+    const starsSlow = Array.from({length:80}, () => ({x:Math.random()*2000, y:Math.random()*2000, size:Math.random()*1.8+0.6, speed:Math.random()*0.8+0.3}));
+    const starsFast = Array.from({length:60}, () => ({x:Math.random()*2000, y:Math.random()*2000, size:Math.random()*2.5+1, speed:Math.random()*2+1.2}));
 
     // Oyuncu
     const player = {
@@ -51,53 +45,50 @@ function initUzayFirtinasi() {
         lastShot: 0,
         fireRate: 160
     };
-    player.x = (canvas.width / (window.devicePixelRatio || 1) - player.width) / 2;
-    player.y = (canvas.height / (window.devicePixelRatio || 1)) - player.height - 80;
 
     let bullets = [];
     let enemies = [];
     let particles = [];
     let powerups = [];
 
-    // Kontroller (mobil odaklı)
-    let moveTouchId = null;
-    let moveStartX = 0;
-    let moveCurrentX = 0;
-    let fireActive = false;
-
-    function getCanvasPos(touch) {
-        const rect = canvas.getBoundingClientRect();
-        const dpr = window.devicePixelRatio || 1;
-        return {
-            x: (touch.clientX - rect.left) * dpr,
-            y: (touch.clientY - rect.top) * dpr
-        };
+    // Başlangıç pozisyon
+    function resetPlayerPos() {
+        const cw = canvas.width / (window.devicePixelRatio || 1);
+        const ch = canvas.height / (window.devicePixelRatio || 1);
+        player.x = (cw - player.width) / 2;
+        player.y = ch - player.height - 80;
     }
+    resetPlayerPos();
+
+    // ── Kontroller (mobil için temiz) ──
+    let moveTouch = null;
+    let moveDelta = 0;
+    let fireTouch = false;
 
     function handleTouchStart(e) {
         e.preventDefault();
         for (let touch of e.changedTouches) {
-            const pos = getCanvasPos(touch);
-            if (pos.x < canvas.width / 2) {
-                // Sol taraf → hareket başlar
-                if (!moveTouchId) {
-                    moveTouchId = touch.identifier;
-                    moveStartX = pos.x;
-                    moveCurrentX = pos.x;
-                }
+            const rect = canvas.getBoundingClientRect();
+            const tx = touch.clientX - rect.left;
+            if (tx < rect.width / 2) {
+                moveTouch = touch.identifier;
+                moveDelta = 0;
             } else {
-                // Sağ taraf → ateş
-                fireActive = true;
+                fireTouch = true;
             }
         }
     }
 
     function handleTouchMove(e) {
         e.preventDefault();
+        if (moveTouch === null) return;
         for (let touch of e.touches) {
-            if (touch.identifier === moveTouchId) {
-                const pos = getCanvasPos(touch);
-                moveCurrentX = pos.x;
+            if (touch.identifier === moveTouch) {
+                const rect = canvas.getBoundingClientRect();
+                const tx = touch.clientX - rect.left;
+                moveDelta = (tx - rect.width / 4) / (rect.width / 4); // sol tarafın merkezine göre
+                moveDelta = Math.max(-1.2, Math.min(1.2, moveDelta));
+                break;
             }
         }
     }
@@ -105,11 +96,11 @@ function initUzayFirtinasi() {
     function handleTouchEnd(e) {
         e.preventDefault();
         for (let touch of e.changedTouches) {
-            if (touch.identifier === moveTouchId) {
-                moveTouchId = null;
-                moveCurrentX = moveStartX = 0;
+            if (touch.identifier === moveTouch) {
+                moveTouch = null;
+                moveDelta = 0;
             } else if (touch.clientX >= window.innerWidth / 2) {
-                fireActive = false;
+                fireTouch = false;
             }
         }
     }
@@ -119,7 +110,7 @@ function initUzayFirtinasi() {
     canvas.addEventListener('touchend', handleTouchEnd, {passive: false});
     canvas.addEventListener('touchcancel', handleTouchEnd, {passive: false});
 
-    // Klavye desteği (bilgisayar testi için)
+    // Klavye
     let keys = {};
     document.addEventListener('keydown', e => { keys[e.code] = true; if(e.code==='Space') e.preventDefault(); });
     document.addEventListener('keyup', e => keys[e.code] = false);
@@ -128,47 +119,31 @@ function initUzayFirtinasi() {
         const now = Date.now();
         if (now - player.lastShot < player.fireRate) return;
         player.lastShot = now;
-        bullets.push({
-            x: player.x + player.width/2 - 7,
-            y: player.y - 15,
-            w: 14,
-            h: 28,
-            speed: 18
-        });
+        bullets.push({x: player.x + player.width/2 - 7, y: player.y - 15, w:14, h:28, speed:18});
     }
 
     function update() {
         if (!gameActive) return;
 
-        // Hareket hesaplama
+        // Hareket
         let moveDir = 0;
-
-        // Klavye
         if (keys['ArrowLeft'] || keys['KeyA']) moveDir -= 1;
         if (keys['ArrowRight'] || keys['KeyD']) moveDir += 1;
-
-        // Mobil dokunma
-        if (moveTouchId !== null) {
-            const deltaX = moveCurrentX - moveStartX;
-            moveDir = deltaX / 80;  // hassasiyet (daha küçük değer = daha yavaş)
-            moveDir = Math.max(-1, Math.min(1, moveDir));
-        }
+        if (moveTouch !== null) moveDir += moveDelta;
 
         player.x += moveDir * player.speed;
-
         const cw = canvas.width / (window.devicePixelRatio || 1);
         player.x = Math.max(30, Math.min(cw - player.width - 30, player.x));
 
         // Ateş
-        if (keys['Space'] || fireActive) shoot();
+        if (keys['Space'] || fireTouch) shoot();
 
-        // Yıldızlar
+        // Yıldızlar, mermiler, düşmanlar, power-up, parçacıklar (öncekiyle aynı)
         starsSlow.forEach(s => { s.y += s.speed; if (s.y > 2000) s.y = -50; });
         starsFast.forEach(s => { s.y += s.speed; if (s.y > 2000) s.y = -50; });
 
         bullets = bullets.filter(b => { b.y -= b.speed; return b.y > -50; });
 
-        // Düşman üretimi
         if (Math.random() < 0.022 + score * 0.0007) {
             const type = Math.random() < 0.3 ? 'fast' : 'normal';
             enemies.push({
@@ -181,12 +156,10 @@ function initUzayFirtinasi() {
             });
         }
 
-        // Power-up
         if (Math.random() < 0.0035) {
             powerups.push({x: Math.random() * (cw - 40) + 20, y: -40, size: 22, speed: 2.8});
         }
 
-        // Düşmanlar + çarpışmalar
         enemies = enemies.filter((e, i) => {
             e.y += e.speed;
 
@@ -235,7 +208,7 @@ function initUzayFirtinasi() {
     }
 
     function updateLivesUI() {
-        livesEl.innerHTML = '❤️'.repeat(lives) + (combo > 1 ? `  Combo ×${combo}` : '');
+        livesEl.innerHTML = '❤️'.repeat(lives) + (combo > 1 ? ` Combo ×${combo}` : '');
         livesEl.classList.remove('hidden');
     }
 
@@ -279,7 +252,7 @@ function initUzayFirtinasi() {
         ctx.shadowBlur = 12; ctx.shadowColor = '#ffffff'; ctx.fillStyle = '#ffffff';
         starsFast.forEach(s => ctx.fillRect(s.x % cw, s.y % ch, s.size*1.4, s.size*1.4));
 
-        // Gemi çizimi (havalı)
+        // Gemi
         ctx.shadowBlur = 35; ctx.shadowColor = '#00ffff'; ctx.fillStyle = '#00ddff';
         ctx.beginPath();
         ctx.moveTo(player.x + player.width/2, player.y);
@@ -301,17 +274,14 @@ function initUzayFirtinasi() {
         ctx.shadowBlur = 40; ctx.shadowColor = '#ff6600'; ctx.fillStyle = '#ffaa00';
         ctx.fillRect(player.x + player.width/2 - 8, player.y + player.height - 6, 16, flame);
 
-        // Mermiler
         ctx.shadowBlur = 18; ctx.shadowColor = '#ff00ff'; ctx.fillStyle = '#ff00ff';
         bullets.forEach(b => drawRoundRect(ctx, b.x, b.y, b.w, b.h, 6));
 
-        // Düşmanlar
         enemies.forEach(e => {
             ctx.shadowBlur = 22; ctx.shadowColor = e.color; ctx.fillStyle = e.color;
             ctx.beginPath(); ctx.arc(e.x + e.w/2, e.y + e.h/2, e.w/2, 0, Math.PI*2); ctx.fill();
         });
 
-        // Power-up
         ctx.shadowBlur = 15; ctx.shadowColor = '#22ff88'; ctx.fillStyle = '#22ff88';
         powerups.forEach(p => {
             ctx.save(); ctx.translate(p.x + p.size/2, p.y + p.size/2);
@@ -319,7 +289,6 @@ function initUzayFirtinasi() {
             ctx.fillText('❤️', -p.size/2, p.size/2); ctx.restore();
         });
 
-        // Parçacıklar
         particles = particles.filter(p => {
             p.x += p.vx; p.y += p.vy; p.life--;
             ctx.globalAlpha = p.life / 28;
@@ -341,8 +310,7 @@ function initUzayFirtinasi() {
     function restart() {
         score = 0; lives = 3; combo = 0;
         bullets = []; enemies = []; particles = []; powerups = [];
-        player.x = (canvas.width / (window.devicePixelRatio || 1) - player.width) / 2;
-        player.y = (canvas.height / (window.devicePixelRatio || 1)) - player.height - 70;
+        resetPlayerPos();
         scoreEl.textContent = '0';
         updateLivesUI();
         gameOverScreen.classList.add('hidden');
@@ -356,8 +324,8 @@ function initUzayFirtinasi() {
 
     function cleanup() {
         if (animationFrameId) cancelAnimationFrame(animationFrameId);
-        document.removeEventListener('keydown', ()=>{});
-        document.removeEventListener('keyup', ()=>{});
+        document.removeEventListener('keydown', () => {});
+        document.removeEventListener('keyup', () => {});
         canvas.removeEventListener('touchstart', handleTouchStart);
         canvas.removeEventListener('touchmove', handleTouchMove);
         canvas.removeEventListener('touchend', handleTouchEnd);
